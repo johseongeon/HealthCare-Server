@@ -5,7 +5,7 @@ import cerberus.HealthCare.global.security.JwtTokenProvider;
 import cerberus.HealthCare.user.dto.SignUpRequest;
 import cerberus.HealthCare.user.dto.SignUpResponse;
 import cerberus.HealthCare.user.entity.User;
-import cerberus.HealthCare.user.repository.UserRepository;
+import cerberus.HealthCare.user.repository.UserAuthRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,9 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class UserService {
+public class UserAuthService {
 
-    private final UserRepository userRepository;
+    private final UserAuthRepository userAuthRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
@@ -48,12 +48,12 @@ public class UserService {
     @Transactional
     public SignUpResponse signUp(SignUpRequest signUpRequest) {
 
-        if (userRepository.existsByEmail(signUpRequest.getEmail())){
+        if (userAuthRepository.existsByEmail(signUpRequest.getEmail())){
             throw new IllegalArgumentException("이미 사용중인 이메일 입니다.");
         }
 
         String encodedPassword = passwordEncoder.encode(signUpRequest.getPassword());
-        User user = userRepository.save(signUpRequest.toUser(encodedPassword));
+        User user = userAuthRepository.save(signUpRequest.toUser(encodedPassword));
         return new SignUpResponse(user.getEmail(), user.getNickname(), user.getRoles());
 
     }
