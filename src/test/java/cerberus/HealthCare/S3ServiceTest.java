@@ -37,17 +37,9 @@ public class S3ServiceTest {
     }
 
     @Test
-    void testGetUploadPresignedUrl() throws Exception {
-        String key = "test/presigned-upload.txt";
-        String url = s3Service.getUploadPresignedUrlBlocking(key, 600);
-
-        System.out.println("Upload Presigned URL: " + url);
-    }
-
-    @Test
-    void testGetDownloadPresignedUrl() throws Exception {
+    void testGetPresignedUrl() throws Exception {
         String key = "test/test-upload.txt";
-        String url = s3Service.getDownloadPresignedUrlBlocking(key, 600);
+        String url = s3Service.getPresignedUrlBlocking(key, 600);
 
         System.out.println("Download Presigned URL: " + url);
     }

@@ -63,30 +63,7 @@ class S3Service {
         }
     }
 
-    suspend fun getUploadPresignedUrl(
-        key: String,
-        expireSeconds: Long = 3600
-    ): String {
-        return try {
-            val req = PutObjectRequest {
-                bucket = bucketName
-                this.key = key
-            }
-            val presigned = s3.presignPutObject(req, expireSeconds.seconds)
-            presigned.url.toString()
-        } catch (e: Exception) {
-            logger.error("Failed to generate upload presigned URL for: $key", e)
-            throw e
-        }
-    }
-
-    fun getUploadPresignedUrlBlocking(key: String, expireSeconds: Long = 3600): String {
-        return runBlocking {
-            getUploadPresignedUrl(key, expireSeconds)
-        }
-    }
-
-    suspend fun getDownloadPresignedUrl(
+    suspend fun getPresignedUrl(
         key: String,
         expireSeconds: Long = 3600
     ): String {
@@ -103,9 +80,9 @@ class S3Service {
         }
     }
 
-    fun getDownloadPresignedUrlBlocking(key: String, expireSeconds: Long = 3600): String {
+    fun getPresignedUrlBlocking(key: String, expireSeconds: Long = 3600): String {
         return runBlocking {
-            getDownloadPresignedUrl(key, expireSeconds)
+            getPresignedUrl(key, expireSeconds)
         }
     }
 }
