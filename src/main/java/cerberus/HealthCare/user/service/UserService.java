@@ -1,5 +1,7 @@
 package cerberus.HealthCare.user.service;
 
+import cerberus.HealthCare.global.exception.CoreException;
+import cerberus.HealthCare.global.exception.code.UserErrorCode;
 import cerberus.HealthCare.user.dto.SleepPatternResponse;
 import cerberus.HealthCare.user.entity.User;
 import cerberus.HealthCare.user.repository.UserRepository;
@@ -18,9 +20,8 @@ public class UserService {
     @Transactional
     public SleepPatternResponse addSleepPattern(String username, String pattern) {
         User user = userRepository.findByEmail(username)
-            .orElseThrow(() -> new IllegalArgumentException("유저를 찾을 수 없습니다."));
+            .orElseThrow(() -> new CoreException(UserErrorCode.USER_NOT_FOUND));
         user.setSleepPattern(pattern);
-        userRepository.save(user);
         return new SleepPatternResponse(user.getId(), user.getSleepPattern());
     }
 }

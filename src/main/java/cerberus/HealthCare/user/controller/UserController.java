@@ -28,23 +28,16 @@ public class UserController {
 
     private final UserService userService;
 
-    @Operation(summary = "로그인", description = "사용자 로그인")
+    @Operation(summary = "수면 패턴 입력", description = "초기 사용자 수면 패턴 입력")
     @ApiResponses({
-        @ApiResponse(responseCode = "200", description = "로그인 성공"),
+        @ApiResponse(responseCode = "201", description = "수면 패턴 추가 완료"),
         @ApiResponse(responseCode = "401", description = "이메일 또는 비밀번호가 일치하지 않습니다.")
     })
     @PostMapping("/sleep-pattern")
     public ResponseEntity<BaseResponse<SleepPatternResponse>> createSleepPattern(
         @RequestBody SleepPatternRequest request,
         @AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-        try{
-            SleepPatternResponse sleepPatternResponse = userService.addSleepPattern(userDetails.getUsername(), request.getPattern());
-            return BaseResponse.ok("로그인 성공", sleepPatternResponse);
-        }catch (Exception e){
-            return BaseResponse.unauthorized("이메일 또는 비밀번호가 일치하지 않습니다.", null);
-        }
+        SleepPatternResponse sleepPatternResponse = userService.addSleepPattern(userDetails.getUsername(), request.getPattern());
+        return BaseResponse.ok("수면 패턴 추가 완료", sleepPatternResponse);
     }
 }
