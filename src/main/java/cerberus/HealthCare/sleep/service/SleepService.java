@@ -3,6 +3,7 @@ package cerberus.HealthCare.sleep.service;
 import cerberus.HealthCare.global.exception.CoreException;
 import cerberus.HealthCare.global.exception.code.UserErrorCode;
 import cerberus.HealthCare.sleep.dto.CreateSleepResponse;
+import cerberus.HealthCare.sleep.dto.SleepLog24HResponse;
 import cerberus.HealthCare.sleep.entity.SleepLog;
 import cerberus.HealthCare.sleep.repository.SleepRepository;
 import cerberus.HealthCare.user.entity.User;
@@ -10,6 +11,7 @@ import cerberus.HealthCare.user.repository.UserRepository;
 import cerberus.HealthCare.user.service.UserService;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -23,7 +25,6 @@ public class SleepService {
 
     private final SleepRepository sleepRepository;
     private final UserRepository userRepository;
-
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
@@ -47,5 +48,19 @@ public class SleepService {
 
         sleepRepository.save(sleepLog);
         return new CreateSleepResponse(user.getId(), sleepLog.getId(), start, end);
+    }
+
+    @Transactional
+    public List<SleepLog24HResponse> getSleep24Hours(String username) {
+        User user = userRepository.findByEmail(username)
+            .orElseThrow(() -> new CoreException(UserErrorCode.USER_NOT_FOUND));
+
+        LocalDateTime after = LocalDateTime.now().minusHours(24);
+
+        List<SleepLog> logs = sleepRepository.findAllByUserAndStartAfterOrderByStartDesc(user, after);
+
+        return logs.stream()
+            .map(SleepLog24HResponse::fromEntity)
+            .toList();
     }
 }

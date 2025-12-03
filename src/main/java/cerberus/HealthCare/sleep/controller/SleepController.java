@@ -4,6 +4,7 @@ import cerberus.HealthCare.global.common.BaseResponse;
 import cerberus.HealthCare.global.security.CustomUserDetails;
 import cerberus.HealthCare.sleep.dto.CreateSleepRequest;
 import cerberus.HealthCare.sleep.dto.CreateSleepResponse;
+import cerberus.HealthCare.sleep.dto.SleepLog24HResponse;
 import cerberus.HealthCare.sleep.service.SleepService;
 import cerberus.HealthCare.user.dto.SleepPatternRequest;
 import cerberus.HealthCare.user.dto.SleepPatternResponse;
@@ -11,9 +12,11 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -37,6 +40,18 @@ public class SleepController {
         @RequestBody CreateSleepRequest request,
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         CreateSleepResponse createSleepResponse = sleepService.createSleep(userDetails.getUsername(), request.getStart(), request.getEnd());
-        return BaseResponse.ok("수면 기록 추가 완료", createSleepResponse);
+        return BaseResponse.created("수면 기록 추가 완료", createSleepResponse);
+    }
+
+    @Operation(summary = "수면 시간 조회(24시간)", description = "사용자 수면 시간 조회(24시간)")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "수면 기록 조회 완료"),
+        @ApiResponse(responseCode = "401", description = "유저를 찾을 수 없습니다")
+    })
+    @GetMapping("/get")
+    public ResponseEntity<BaseResponse<List<SleepLog24HResponse>>> getSleep24Hours(
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        List<SleepLog24HResponse> sleepLog24HResponse = sleepService.getSleep24Hours(userDetails.getUsername());
+        return BaseResponse.ok("수면 기록 추가 완료", sleepLog24HResponse);
     }
 }
