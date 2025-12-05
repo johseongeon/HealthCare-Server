@@ -2,6 +2,7 @@ package cerberus.HealthCare.user.controller;
 
 import cerberus.HealthCare.global.common.BaseResponse;
 import cerberus.HealthCare.global.security.CustomUserDetails;
+import cerberus.HealthCare.user.dto.HealthAdviceResponse;
 import cerberus.HealthCare.user.dto.report.HealthAnalysisResponse;
 import cerberus.HealthCare.user.dto.report.HealthReportResponse;
 import cerberus.HealthCare.user.dto.SleepPatternRequest;
@@ -69,6 +70,19 @@ public class UserController {
         @AuthenticationPrincipal CustomUserDetails userDetails) {
         HealthReportResponse healthReportResponse = userService.getHealthReport2(userDetails.getUsername(), date);
         return BaseResponse.ok("건강리포트 조회 완료", healthReportResponse);
+    }
+
+    @Operation(summary = "건강 조언 조회", description = "사용자 건강 조언 조회")
+    @ApiResponses({
+        @ApiResponse(responseCode = "200", description = "건강 조언 조회 완료"),
+        @ApiResponse(responseCode = "401", description = "유저를 찾을 수 없습니다")
+    })
+    @GetMapping("/home/advice/{type}")
+    public ResponseEntity<BaseResponse<HealthAdviceResponse>> getHealthAdvice(
+        @PathVariable Integer type,
+        @AuthenticationPrincipal CustomUserDetails userDetails) {
+        HealthAdviceResponse healthAdviceResponse = userService.getHealthAdvice(userDetails.getUsername(), type);
+        return BaseResponse.ok("건강 조언 조회 완료", healthAdviceResponse);
     }
 
 

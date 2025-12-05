@@ -3,6 +3,7 @@ package cerberus.HealthCare.user.service;
 import cerberus.HealthCare.global.exception.CoreException;
 import cerberus.HealthCare.global.exception.code.CommonErrorCode;
 import cerberus.HealthCare.global.exception.code.UserErrorCode;
+import cerberus.HealthCare.user.dto.HealthAdviceResponse;
 import cerberus.HealthCare.user.dto.report.HealthAnalysisResponse;
 import cerberus.HealthCare.user.dto.report.HealthReportResponse;
 import cerberus.HealthCare.user.dto.SleepPatternResponse;
@@ -24,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final HealthReportRepository healthReportRepository;
+    private final ReportService reportService;
 
     @Transactional
     public SleepPatternResponse addSleepPattern(String username, String pattern) {
@@ -53,5 +55,12 @@ public class UserService {
         } catch (Exception e) {
             throw new RuntimeException("GPT 응답 파싱 실패", e);
         }
+    }
+
+    public HealthAdviceResponse getHealthAdvice(String username, Integer type) {
+        User user = userRepository.findByEmail(username)
+            .orElseThrow(() -> new CoreException(UserErrorCode.USER_NOT_FOUND));
+
+        return new HealthAdviceResponse(user.getNickname() + "님, " + reportService.generateAdvice(user, LocalDate.now(), type));
     }
 }

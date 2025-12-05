@@ -91,14 +91,40 @@ public class ReportService {
 
         // GPT 호출
         return chatGPT.getCompletionMessageBlocking(prompt);
+    }
 
+    public String buildAdvicePrompt(List<SleepLogDto> sleeps, List<MealDto> meals, Integer type) {
 
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        try {
-//            return objectMapper.readValue(json, HealthAnalysisResponse.class);
-//        } catch (Exception e) {
-//            throw new RuntimeException("GPT 응답 파싱 실패", e);
-//        }
+        return """
+                당신은 건강 데이터 분석 전문가입니다.
+                아래 제공되는 "수면 정보"와 "식사 정보"를 기반으로 사용자의 건강 상태를 분석하고 한국어 20자 이내의 구체적인 건강 조언을 하세요.
+
+                분석 규칙:
+                0. 1:힐링형/ 2:유머형/ 3:코치형 세가지 형식 중 아래 제공되는 조언 형식의 말투로 각 말투의 특징이 잘 나타나게 조언하라.([조언 형식] "1"이면 힐링형 말투로 조언, [조언 형식] "2"이면 유머형 말투로 조언, [조언 형식] "3"이면 코치형 말투로 조언)
+                1. "각각의 형식마다 반드시 한국어 20자 이내 String만 출력하라. 큰따옴표, 작은따옴표, 슬래시 등은 절대 포함하지 마라."
+                2. 예시: 오늘은 일찍 주무시는거 어때요?😊, 어서 식사를 하시는게 좋아요!😢 등등
+                
+                
+                """
+            + "\n\n[수면 정보]\n" + sleeps.toString()
+            + "\n\n[식사 정보]\n" + meals.toString()
+            + "\n\n[조언 형식]\n" + type.toString();
+    }
+
+    public String generateAdvice(User user, LocalDate date, Integer type) {
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.atTime(23, 59, 59);
+
+        List<Meal> meals = mealRepository.findByUserIdAndEatTimeBetween(user.getId(), start, end);
+        List<SleepLog> sleeps = sleepRepository.findByUserIdAndStartBetween(user.getId(), start, end);
+
+        List<MealDto> mealDtos = meals.stream().map(MealDto::toMealDto).toList();
+        List<SleepLogDto> sleepDtos = sleeps.stream().map(SleepLogDto::toSleepLogDto).toList();
+
+        String prompt = buildAdvicePrompt(sleepDtos, mealDtos, type);
+
+        // GPT 호출
+        return chatGPT.getCompletionMessageBlocking(prompt);
     }
 
 }
